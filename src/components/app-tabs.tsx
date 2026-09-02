@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { CameraScreen } from '@/screens/CameraScreen';
+import { MealHistoryScreen } from '@/screens/MealHistoryScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
@@ -41,6 +42,14 @@ export default function AppTabs() {
         options={{
           tabBarLabel: 'Add Meal',
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📸</Text>,
+        }}
+      />
+      <Tab.Screen
+        name="History"
+        component={MealHistoryScreen}
+        options={{
+          tabBarLabel: 'History',
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📋</Text>,
         }}
       />
       <Tab.Screen

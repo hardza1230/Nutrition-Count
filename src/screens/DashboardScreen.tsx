@@ -1,20 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   ScrollView,
   Text,
   StyleSheet,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { NutritionBar } from '@/components/NutritionBar';
 import { MealCard } from '@/components/MealCard';
 import { useNutrition } from '@/hooks/useNutrition';
 import { useNutritionStore } from '@/store/nutritionStore';
+import { getTodaysMeals } from '@/services/meals';
 
 export const DashboardScreen: React.FC = () => {
-  const { todaysMeals, progressBars, updateDailySummary, dailySummary } =
+  const { progressBars, updateDailySummary, dailySummary, setMeals } =
     useNutrition();
+  const { todaysMeals } = useNutrition();
   const setTarget = useNutritionStore((state) => state.setTarget);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadMeals = async () => {
+    try {
+      const meals = await getTodaysMeals('user-temp');
+      setMeals(meals);
+    } catch (error) {
+      console.error('Load meals error:', error);
+    }
+  };
 
   useEffect(() => {
     // Initialize default target
@@ -31,15 +45,32 @@ export const DashboardScreen: React.FC = () => {
       updatedAt: new Date().toISOString(),
     });
 
-    updateDailySummary();
+    loadMeals();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadMeals();
+    }, [])
+  );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadMeals();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     updateDailySummary();
   }, [todaysMeals]);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Today's Nutrition</Text>
         <Text style={styles.date}>
