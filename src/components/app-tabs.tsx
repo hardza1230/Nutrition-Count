@@ -1,32 +1,56 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { Text } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { DashboardScreen } from '@/screens/DashboardScreen';
+import { CameraScreen } from '@/screens/CameraScreen';
+import { SettingsScreen } from '@/screens/SettingsScreen';
 
-import { Colors } from '@/constants/theme';
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function DashboardStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
+      <Stack.Screen name="dashboard" component={DashboardScreen} />
+    </Stack.Navigator>
+  );
+}
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#10b981',
+        tabBarInactiveTintColor: '#9ca3af',
+      }}>
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardStack}
+        options={{
+          tabBarLabel: 'Today',
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📊</Text>,
+        }}
+      />
+      <Tab.Screen
+        name="Camera"
+        component={CameraScreen}
+        options={{
+          tabBarLabel: 'Add Meal',
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📸</Text>,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarLabel: 'Settings',
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>⚙️</Text>,
+        }}
+      />
+    </Tab.Navigator>
   );
 }
