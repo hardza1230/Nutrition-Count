@@ -7,13 +7,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { analyzeMealImage } from '@/services/claudeVision';
-import { useNutritionStore } from '@/store/nutritionStore';
+import { useMealAnalysis } from '@/hooks/useMealAnalysis';
 
 export const CameraScreen: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const addMeal = useNutritionStore((state) => state.addMeal);
+  const { analyzeMeal, loading, error: analysisError } = useMealAnalysis();
+  const [success, setSuccess] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -25,13 +23,16 @@ export const CameraScreen: React.FC = () => {
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      analyzeImage(result.assets[0].base64);
+      processImage(result.assets[0].base64);
     }
   };
 
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) return;
+    if (!permission.granted) {
+      alert('Camera permission required');
+      return;
+    }
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -41,34 +42,18 @@ export const CameraScreen: React.FC = () => {
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      analyzeImage(result.assets[0].base64);
+      processImage(result.assets[0].base64);
     }
   };
 
-  const analyzeImage = async (base64: string) => {
-    setLoading(true);
-    setError(null);
-
+  const processImage = async (base64: string) => {
     try {
-      const result = await analyzeMealImage(base64);
-
-      const meal = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: 'user',
-        photoUrl: `data:image/jpeg;base64,${base64}`,
-        createdAt: new Date().toISOString(),
-        mealType: 'lunch' as const,
-        nutritionalData: result.nutritionData,
-        foodItemsIdentified: result.foodItems,
-      };
-
-      addMeal(meal);
-      setError('Meal added! 🎉');
+      setSuccess(false);
+      await analyzeMeal(base64, 'lunch');
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError('Failed to analyze meal. Try again.');
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -76,14 +61,15 @@ export const CameraScreen: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Add Meal</Text>
 
-      {error && (
-        <View
-          style={[
-            styles.message,
-            error.includes('Failed') ? styles.error : styles.success,
-          ]}
-        >
-          <Text style={styles.messageText}>{error}</Text>
+      {success && (
+        <View style={[styles.message, styles.success]}>
+          <Text style={styles.messageText}>✅ Meal added! Analyzing...</Text>
+        </View>
+      )}
+
+      {analysisError && (
+        <View style={[styles.message, styles.error]}>
+          <Text style={styles.messageText}>❌ {analysisError}</Text>
         </View>
       )}
 
