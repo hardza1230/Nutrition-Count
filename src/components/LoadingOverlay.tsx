@@ -19,7 +19,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible }) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
