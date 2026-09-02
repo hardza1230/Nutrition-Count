@@ -1,56 +1,119 @@
-# Welcome to your Expo app 👋
+# Nutrition Count - Meal Tracking App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile application (iOS/Android) for tracking daily nutrition intake through photo-based food recognition. Users take photos of meals, the app analyzes nutritional content using Claude Vision API, and displays progress with gamified RPG-style status bars.
 
-## Get started
+## Quick Start
 
-1. Install dependencies
-
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. **Setup environment**
    ```bash
-   npx expo start
+   cp .env.example .env.local
+   # Fill in your credentials in .env.local
    ```
 
-In the output, you'll find options to open the app in a
+3. **Start development**
+   ```bash
+   npm start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Documentation
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **[CLAUDE.md](./CLAUDE.md)** - Project architecture and tech stack overview
+- **[SETUP.md](./SETUP.md)** - Detailed environment setup instructions
+- **[BUILD.md](./BUILD.md)** - Local and production build instructions
+- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Pre-deployment verification steps
+- **[.github/GITHUB_ACTIONS.md](./.github/GITHUB_ACTIONS.md)** - CI/CD pipeline setup and usage
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+- **Frontend:** React Native + Expo (iOS/Android)
+- **Backend:** Supabase (PostgreSQL + Storage)
+- **AI:** Claude Vision API (Anthropic)
+- **State:** Zustand
+- **Animation:** React Native Reanimated
+- **Language:** TypeScript
 
+## Features
+
+- 📸 Photo-based meal recognition via Claude Vision API
+- 📊 RPG-style gamified nutrition progress bars
+- 🎯 Daily nutrition tracking (Calories, Macros, Micronutrients, Fiber, Sodium, Sugar)
+- 📱 Cross-platform iOS/Android support
+- 🗄️ Cloud storage with Supabase
+- 🔐 User authentication
+- 🤖 CI/CD via GitHub Actions with automated APK/IPA builds
+
+## CI/CD Workflows
+
+GitHub Actions automatically:
+- ✅ Runs TypeScript type checking and linting on every push
+- ✅ Validates project configuration and structure
+- ✅ Builds Android APK with auto-incrementing patch versions
+- ✅ Builds iOS IPA with version management
+- ✅ Creates GitHub Releases with build artifacts
+
+See [.github/GITHUB_ACTIONS.md](./.github/GITHUB_ACTIONS.md) for setup instructions and manual trigger commands.
+
+## Running the App
+
+**Web:**
 ```bash
-npm run reset-project
+npm run web
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+**Android:**
+```bash
+npm run android
+```
 
-### Other setup steps
+**iOS (macOS only):**
+```bash
+npm run ios
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+**Expo Development Server:**
+```bash
+npm start
+```
 
-## Learn more
+## Database
 
-To learn more about developing your project with Expo, look at the following resources:
+PostgreSQL database hosted on Supabase with tables for:
+- Users (authentication and targets)
+- Meals (photos and nutrition data)
+- Nutrition Targets (daily goals)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+See [supabase/migrations/001_init.sql](./supabase/migrations/001_init.sql) for schema.
 
-## Join the community
+## Environment Variables
 
-Join our community of developers creating universal apps.
+Required for development:
+- `EXPO_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `EXPO_PUBLIC_ANTHROPIC_API_KEY` - Anthropic API key
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See `.env.example` for template.
+
+## Project Structure
+
+```
+src/
+├── components/        # UI components (NutritionBar, MealCard, etc.)
+├── screens/          # Navigation screens
+├── hooks/            # Custom React hooks
+├── services/         # External API integration
+├── store/            # Zustand state management
+├── types/            # TypeScript definitions
+└── utils/            # Utility functions
+```
+
+## Learn More
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Docs](https://reactnative.dev/)
+- [Supabase Docs](https://supabase.com/docs)
+- [Anthropic API](https://docs.anthropic.com/)
