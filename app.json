@@ -1,42 +1,64 @@
 {
   "expo": {
-    "name": "nutrition-count-app",
-    "slug": "nutrition-count-app",
+    "name": "Nutrition Count",
+    "slug": "nutrition-count",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "nutritioncountapp",
     "userInterfaceStyle": "automatic",
+    "description": "Track your daily nutrition intake with AI-powered photo recognition",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.nutritioncount.app",
+      "icon": "./assets/expo.icon",
+      "privacyManifestPath": "./privacy.json"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#10b981",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.nutritioncount.app",
+      "predictiveBackGestureEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.INTERNET"
+      ]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
+    },
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#10b981"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#10b981",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Nutrition Count to access your camera to scan meals"
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }
