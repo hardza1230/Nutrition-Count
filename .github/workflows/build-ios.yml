@@ -21,6 +21,8 @@ jobs:
     runs-on: macos-latest
     permissions:
       contents: write
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -37,11 +39,6 @@ jobs:
 
       - name: Install EAS CLI
         run: npm install -g eas-cli
-
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
-        with:
-          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Determine version
         id: version
