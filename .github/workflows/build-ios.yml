@@ -1,0 +1,131 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches:
+      - claude/meal-tracking-app-design-icd2uu
+      - main
+    paths:
+      - 'src/**'
+      - 'app.json'
+      - 'package.json'
+      - 'tsconfig.json'
+  workflow_dispatch:
+    inputs:
+      patch_version:
+        description: 'Patch version (e.g., 1.0.1)'
+        required: false
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Determine version
+        id: version
+        run: |
+          CURRENT_VERSION=$(jq -r '.expo.version' app.json)
+
+          if [ -z "${{ github.event.inputs.patch_version }}" ]; then
+            MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+            MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
+            PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          else
+            NEW_VERSION="${{ github.event.inputs.patch_version }}"
+          fi
+
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update version in app.json
+        run: |
+          jq '.expo.version = "${{ steps.version.outputs.new_version }}" | .expo.runtimeVersion = "${{ steps.version.outputs.new_version }}"' app.json > app.json.tmp
+          mv app.json.tmp app.json
+
+      - name: Build iOS IPA
+        run: |
+          eas build --platform ios --non-interactive --wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Create release
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ios-v${{ steps.version.outputs.new_version }}
+          release_name: iOS Release ${{ steps.version.outputs.new_version }}
+          body: |
+            ## Nutrition Count iOS v${{ steps.version.outputs.new_version }}
+
+            ### Changes
+            - Auto-build IPA from latest code
+            - Previous version: ${{ steps.version.outputs.current_version }}
+
+            ### Build Info
+            - Built on: macOS Latest
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref }}
+
+            ### Download
+            Check EAS dashboard: https://expo.dev/builds
+
+            ### Installation (TestFlight)
+            1. Download IPA from EAS
+            2. Use Transporter or App Store Connect to upload
+            3. Add beta testers via TestFlight
+
+            ### Installation (Direct Device)
+            ```bash
+            ios-app-installer install app.ipa
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Commit version bump
+        if: success()
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add app.json
+          git commit -m "Bump iOS version to ${{ steps.version.outputs.new_version }}" || true
+          git push origin ${{ github.ref }}
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ iOS IPA build successful!"
+          echo "Version: ${{ steps.version.outputs.new_version }}"
+          echo "Check EAS dashboard for download"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "❌ iOS IPA build failed"
+          echo "Check logs for details"
